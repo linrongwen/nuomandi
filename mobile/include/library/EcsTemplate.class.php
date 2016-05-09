@@ -245,7 +245,8 @@ class EcsTemplate {
                 $source = str_replace('%%%SMARTYSP' . $curr_sp . '%%%', '<?php echo \'' . str_replace("'", "\'", $sp_match[1][$curr_sp]) . '\'; ?>' . "\n", $source);
             }
         }
-        return preg_replace("/{([^\}\{\n]*)}/e", "\$this->select('\\1');", $source);
+        //return preg_replace("/{([^\}\{\n]*)}/e", "\$this->select('\\1');", $source);
+        return preg_replace_callback("/{([^\}\{\n]*)}/", function($r){return $this->select($r[1]);}, $source);
     }
 
     /**
@@ -906,9 +907,11 @@ class EcsTemplate {
          */
         if ($file_type == '.dwt') {
             /* 将模板中所有library替换为链接 */
-            $pattern = '/<!--\s#BeginLibraryItem\s\"\/(.*?)\"\s-->.*?<!--\s#EndLibraryItem\s-->/se';
-            $replacement = "'{include file='.strtolower('\\1'). '}'";
-            $source = preg_replace($pattern, $replacement, $source);
+//            $pattern = '/<!--\s#BeginLibraryItem\s\"\/(.*?)\"\s-->.*?<!--\s#EndLibraryItem\s-->/se';
+            $pattern = '/<!--\s#BeginLibraryItem\s\"\/(.*?)\"\s-->.*?<!--\s#EndLibraryItem\s-->/s';
+//            $replacement = "'{include file='.strtolower('\\1'). '}'";
+            //$source = preg_replace($pattern, $replacement, $source);
+            $source = preg_replace_callback($pattern, function($r){return '{include file='.strtolower($r[1]). '}';}, $source);
 
             /* 检查有无动态库文件，如果有为其赋值 */
             $template = C('template');
